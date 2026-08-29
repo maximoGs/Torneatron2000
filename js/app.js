@@ -1,5 +1,5 @@
 /**
- * Torneatron 2000 - Interactive Schema Controller & Confetti Engine
+ * Torneatron 2000 - Interactive Schema Controller & Live Name Editing
  */
 
 import { BracketEngine } from './bracketEngine.js';
@@ -16,7 +16,7 @@ class App {
         if (el) el.textContent = timeStr;
       },
       () => {
-        this.showToast('¡Tiempo de ronda agotado! ⏰', 'warning');
+        this.showToast('¡Tiempo de ronda finalizado! ⏰', 'warning');
       }
     );
 
@@ -29,18 +29,35 @@ class App {
   }
 
   bindEvents() {
-    // Quick Size Switchers (4, 8, 16)
+    // Quick Size Switchers (2, 4, 8, 16, 32, 64)
     document.querySelectorAll('.btn-quick-size').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const size = parseInt(e.currentTarget.getAttribute('data-size'), 10);
         this.bracket = Storage.getDefaultSampleBracket(size);
         Storage.saveBracket(this.bracket);
         this.render();
-        this.showToast(`Esquema creado con ${size} maestros ♟️`, 'success');
+        this.showToast(`Esquema creado con ${size} participantes ♟️`, 'success');
       });
     });
 
-    // Random Shuffle / Sorteo
+    // Custom Size Input & Button
+    const btnCustomCount = document.getElementById('btn-apply-custom-size');
+    const inputCustomCount = document.getElementById('input-custom-size-count');
+    if (btnCustomCount && inputCustomCount) {
+      btnCustomCount.addEventListener('click', () => {
+        const val = parseInt(inputCustomCount.value, 10);
+        if (isNaN(val) || val < 2 || val > 64) {
+          this.showToast('Ingresa un número de participantes entre 2 y 64', 'error');
+          return;
+        }
+        this.bracket = Storage.getDefaultSampleBracket(val);
+        Storage.saveBracket(this.bracket);
+        this.render();
+        this.showToast(`Esquema generado con ${val} participantes ⚡`, 'success');
+      });
+    }
+
+    // Sorteo / Shuffle
     const btnShuffle = document.getElementById('btn-shuffle-seeds');
     if (btnShuffle) {
       btnShuffle.addEventListener('click', () => {
@@ -53,15 +70,15 @@ class App {
         });
         Storage.saveBracket(this.bracket);
         this.render();
-        this.showToast('¡Sorteo de llaves realizado! 🎲', 'success');
+        this.showToast('¡Sorteo de emparejamientos realizado! 🎲', 'success');
       });
     }
 
-    // Reset All Matches
-    const btnResetMatches = document.getElementById('btn-reset-matches');
-    if (btnResetMatches) {
-      btnResetMatches.addEventListener('click', () => {
-        if (confirm('¿Deseas reiniciar todos los resultados del esquema?')) {
+    // Reset
+    const btnReset = document.getElementById('btn-reset-matches');
+    if (btnReset) {
+      btnReset.addEventListener('click', () => {
+        if (confirm('¿Deseas reiniciar todos los resultados del torneo?')) {
           this.bracket = BracketEngine.createBracket({
             name: this.bracket.name,
             sport: this.bracket.sport,
@@ -76,14 +93,13 @@ class App {
       });
     }
 
-    // New Tournament Modal Trigger
+    // Modals
     const btnNew = document.getElementById('btn-new-tournament-modal');
     const modalNew = document.getElementById('modal-new-tournament');
     if (btnNew && modalNew) {
       btnNew.addEventListener('click', () => modalNew.classList.add('open'));
     }
 
-    // Close Modals
     document.querySelectorAll('.modal-close, .modal-overlay').forEach(el => {
       el.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal-overlay') || e.target.classList.contains('modal-close')) {
@@ -92,7 +108,6 @@ class App {
       });
     });
 
-    // New Tournament Form Submit
     const formNew = document.getElementById('form-new-tournament');
     if (formNew) {
       formNew.addEventListener('submit', (e) => this.handleCreateCustomTournament(e));
@@ -117,12 +132,11 @@ class App {
       btnPrint.addEventListener('click', () => window.print());
     }
 
-    // Export / Import
     const btnExport = document.getElementById('btn-export-json');
     if (btnExport) {
       btnExport.addEventListener('click', () => {
         Storage.exportJSON(this.bracket);
-        this.showToast('Torneo guardado en archivo JSON 📁', 'success');
+        this.showToast('Torneo exportado en JSON 📁', 'success');
       });
     }
 
@@ -165,24 +179,24 @@ class App {
     const championBanner = document.getElementById('champion-banner-container');
 
     if (titleEl) titleEl.textContent = b.name;
-    if (sizeBadgeEl) sizeBadgeEl.textContent = `⚡ ${b.size} Participantes · ${b.totalRounds} Fases`;
+    if (sizeBadgeEl) sizeBadgeEl.textContent = `⚡ ${b.participantsCount || b.size} Participantes · ${b.totalRounds} Rondas`;
 
     // Highlight active quick size button
     document.querySelectorAll('.btn-quick-size').forEach(btn => {
       const s = parseInt(btn.getAttribute('data-size'), 10);
-      btn.classList.toggle('active', s === b.size);
+      btn.classList.toggle('active', s === (b.participantsCount || b.size));
     });
 
-    // Render Champion Banner if exists
+    // Champion Banner
     if (championBanner) {
       if (b.champion) {
         championBanner.style.display = 'block';
         championBanner.innerHTML = `
           <div class="champion-card">
             <div class="champion-trophy">👑 🏆 👑</div>
-            <div class="champion-subtitle">¡CAMPEÓN DEL TORNEO!</div>
+            <div class="champion-subtitle">¡GRAN CAMPEÓN DEL TORNEO!</div>
             <div class="champion-name">${b.champion.name}</div>
-            <div class="champion-meta">${b.champion.club || 'Gran Campeón'} · ${b.champion.elo || 1200} Elo</div>
+            <div class="champion-meta">${b.champion.club || 'Campeón Invicto'} · ${b.champion.elo || 1200} Elo</div>
             <button class="btn-action btn-whatsapp" style="margin: 12px auto 0 auto;" onclick="window.app && window.app.shareWinner()">
               💬 Compartir Victoria en WhatsApp
             </button>
@@ -194,11 +208,11 @@ class App {
       }
     }
 
-    // Render Bracket Columns
+    // Render Bracket Schema Columns
     if (!container) return;
     let html = '<div class="bracket-tree-wrapper">';
 
-    b.rounds.forEach((round, rIndex) => {
+    b.rounds.forEach((round) => {
       html += `
         <div class="bracket-column round-${round.roundNumber}">
           <div class="column-header">
@@ -215,45 +229,59 @@ class App {
         const isDecided = !!match.winnerId;
 
         html += `
-          <div class="schema-match-card ${isDecided ? 'match-decided' : ''}" data-round="${round.roundNumber}" data-match="${match.id}">
+          <div class="schema-match-card ${isDecided ? 'match-decided' : ''}">
             <div class="match-meta-bar">
               <span>Mesa <strong>#${match.board}</strong></span>
-              <span class="match-help-text">${isDecided ? 'Ganador definido ✓' : 'Toca el ganador 👇'}</span>
+              <span class="match-help-text">${isDecided ? 'Ganador ✓' : 'Elige ganador 👇'}</span>
             </div>
 
             <!-- Player 1 Slot (White) -->
-            <div class="schema-player-slot ${p1IsWinner ? 'is-winner' : ''} ${!p1 ? 'is-empty' : ''}" 
-                 data-round="${round.roundNumber}" 
-                 data-match="${match.id}" 
-                 data-player-id="${p1?.id || ''}">
-              <div class="slot-info">
-                <span class="color-indicator white" title="Blancas"></span>
-                <div class="slot-name-group">
-                  <span class="slot-name">${p1 ? p1.name : 'Por definir...'}</span>
-                  ${p1 ? `<span class="slot-elo">${p1.title ? p1.title + ' · ' : ''}${p1.elo || 1200} Elo</span>` : ''}
+            <div class="schema-player-slot ${p1IsWinner ? 'is-winner' : ''} ${!p1 ? 'is-empty' : ''}">
+              <div class="slot-left-content">
+                <span class="color-indicator white" title="Piezas Blancas"></span>
+                <div class="slot-player-details">
+                  <div class="slot-name-row">
+                    <span class="slot-name-text">${p1 ? p1.name : 'Por definir...'}</span>
+                    ${p1 ? `<button class="btn-edit-name" data-player-id="${p1.id}" data-current-name="${p1.name}" title="Editar nombre">✏️</button>` : ''}
+                  </div>
+                  ${p1 ? `<span class="slot-elo-text">${p1.title ? p1.title + ' · ' : ''}${p1.elo || 1200} Elo</span>` : ''}
                 </div>
               </div>
-              <div class="slot-status">
-                ${p1IsWinner ? '<span class="winner-badge">GANADOR ✓</span>' : p1 ? '<span class="tap-hint">Elegir</span>' : ''}
+              <div class="slot-right-actions">
+                ${p1 ? `
+                  <button class="btn-choose-winner" 
+                          data-round="${round.roundNumber}" 
+                          data-match="${match.id}" 
+                          data-player-id="${p1.id}">
+                    ${p1IsWinner ? 'GANADOR ✓' : 'GANA'}
+                  </button>
+                ` : ''}
               </div>
             </div>
 
             <div class="schema-vs-divider">VS</div>
 
             <!-- Player 2 Slot (Black) -->
-            <div class="schema-player-slot ${p2IsWinner ? 'is-winner' : ''} ${!p2 ? 'is-empty' : ''}" 
-                 data-round="${round.roundNumber}" 
-                 data-match="${match.id}" 
-                 data-player-id="${p2?.id || ''}">
-              <div class="slot-info">
-                <span class="color-indicator black" title="Negras"></span>
-                <div class="slot-name-group">
-                  <span class="slot-name">${p2 ? p2.name : 'Por definir...'}</span>
-                  ${p2 ? `<span class="slot-elo">${p2.title ? p2.title + ' · ' : ''}${p2.elo || 1200} Elo</span>` : ''}
+            <div class="schema-player-slot ${p2IsWinner ? 'is-winner' : ''} ${!p2 ? 'is-empty' : ''}">
+              <div class="slot-left-content">
+                <span class="color-indicator black" title="Piezas Negras"></span>
+                <div class="slot-player-details">
+                  <div class="slot-name-row">
+                    <span class="slot-name-text">${p2 ? p2.name : 'Por definir...'}</span>
+                    ${p2 ? `<button class="btn-edit-name" data-player-id="${p2.id}" data-current-name="${p2.name}" title="Editar nombre">✏️</button>` : ''}
+                  </div>
+                  ${p2 ? `<span class="slot-elo-text">${p2.title ? p2.title + ' · ' : ''}${p2.elo || 1200} Elo</span>` : ''}
                 </div>
               </div>
-              <div class="slot-status">
-                ${p2IsWinner ? '<span class="winner-badge">GANADOR ✓</span>' : p2 ? '<span class="tap-hint">Elegir</span>' : ''}
+              <div class="slot-right-actions">
+                ${p2 ? `
+                  <button class="btn-choose-winner" 
+                          data-round="${round.roundNumber}" 
+                          data-match="${match.id}" 
+                          data-player-id="${p2.id}">
+                    ${p2IsWinner ? 'GANADOR ✓' : 'GANA'}
+                  </button>
+                ` : ''}
               </div>
             </div>
           </div>
@@ -269,24 +297,38 @@ class App {
     html += '</div>';
     container.innerHTML = html;
 
-    // Attach Click Events to Player Slots
-    container.querySelectorAll('.schema-player-slot').forEach(slot => {
-      slot.addEventListener('click', (e) => {
+    // Attach Winner Click Handlers
+    container.querySelectorAll('.btn-choose-winner').forEach(btn => {
+      btn.addEventListener('click', (e) => {
         const roundNum = parseInt(e.currentTarget.getAttribute('data-round'), 10);
         const matchId = e.currentTarget.getAttribute('data-match');
         const playerId = e.currentTarget.getAttribute('data-player-id');
-
-        if (!playerId) return; // Cannot select empty slot
 
         const hadChampionBefore = !!this.bracket.champion;
         this.bracket = BracketEngine.setMatchWinner(this.bracket, roundNum, matchId, playerId);
         Storage.saveBracket(this.bracket);
         this.render();
 
-        // Trigger confetti if a new champion was crowned
         if (!hadChampionBefore && this.bracket.champion) {
           this.triggerConfetti();
           this.showToast(`👑 ¡${this.bracket.champion.name} ES EL CAMPEÓN! 🏆`, 'success');
+        }
+      });
+    });
+
+    // Attach Edit Name Click Handlers
+    container.querySelectorAll('.btn-edit-name').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const pId = e.currentTarget.getAttribute('data-player-id');
+        const currName = e.currentTarget.getAttribute('data-current-name');
+
+        const newName = prompt('Editar nombre del participante:', currName);
+        if (newName !== null && newName.trim() !== '') {
+          this.bracket = BracketEngine.renamePlayer(this.bracket, pId, newName);
+          Storage.saveBracket(this.bracket);
+          this.render();
+          this.showToast('Nombre actualizado', 'success');
         }
       });
     });
@@ -340,7 +382,7 @@ class App {
   triggerConfetti() {
     try {
       const count = 70;
-      const colors = ['#f59e0b', '#10b981', '#3b82f6', '#ec4899', '#ffffff'];
+      const colors = ['#f59e0b', '#10b981', '#38bdf8', '#ec4899', '#ffffff'];
 
       for (let i = 0; i < count; i++) {
         const conf = document.createElement('div');
@@ -376,7 +418,6 @@ class App {
   }
 }
 
-// Start app
 document.addEventListener('DOMContentLoaded', () => {
   window.app = new App();
 });

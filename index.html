@@ -5,22 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Torneatron 2000 🏆♟️ | Esquema Interactivo de Torneos</title>
   
-  <meta name="description" content="Crea esquemas interactivos de torneos de ajedrez y multideporte (2, 4, 8, 16, 32, 64 participantes). Toca al ganador de cada enfrentamiento y avanza en tiempo real.">
-  <meta name="theme-color" content="#161b22">
+  <meta name="description" content="Esquema interactivo de torneos de ajedrez y multideporte. Toca al ganador, edita nombres en vivo y avanza en tiempo real hacia el campeonato.">
+  <meta name="theme-color" content="#0b0f19">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="apple-touch-icon" href="assets/icon-192.svg">
   <link rel="manifest" href="manifest.json">
 
-  <!-- Stylesheets -->
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/mobile.css">
+  <!-- Unified Main Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <div id="app">
-    <!-- Top Header -->
+    <!-- Top Sticky Header -->
     <header class="app-header">
       <div class="brand">
         <div class="brand-icon">♟️</div>
@@ -42,7 +40,7 @@
       </div>
     </header>
 
-    <!-- Main Container -->
+    <!-- Main Content Area -->
     <main style="padding: 16px; width: 100%;">
       <!-- Quick Tournament Size Bar & Options -->
       <div class="quick-toolbar">
@@ -54,7 +52,15 @@
           <button class="btn-quick-size" data-size="16">16</button>
           <button class="btn-quick-size" data-size="32">32</button>
           <button class="btn-quick-size" data-size="64">64</button>
+
+          <!-- Custom Numeric Count Input -->
+          <div class="custom-size-input-wrapper" title="Generar cualquier cantidad de participantes">
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">Libre:</span>
+            <input type="number" id="input-custom-size-count" min="2" max="64" value="12" placeholder="12">
+            <button id="btn-apply-custom-size" type="button">Generar</button>
+          </div>
         </div>
+
         <div class="toolbar-actions">
           <button id="btn-shuffle-seeds" class="btn-action btn-secondary" style="padding: 6px 12px; font-size:0.8rem;" title="Mezclar emparejamientos">
             🎲 Sorteo
@@ -66,21 +72,21 @@
       </div>
 
       <!-- Tournament Title Banner -->
-      <div class="tournament-banner" style="margin-bottom: 14px; padding: 14px 16px;">
+      <div class="tournament-banner">
         <div class="banner-header" style="margin-bottom: 4px;">
           <h1 class="banner-title" id="bracket-tournament-title">Copa Torneatron 2000 (8 Maestros) ♟️</h1>
           <span class="banner-badge" id="bracket-size-badge">⚡ 8 Participantes</span>
         </div>
-        <p style="font-size: 0.8rem; color: var(--text-secondary);">
-          👉 Toca sobre cualquier contrincante (⚪ Blancas o ⚫ Negras) para declararlo ganador y avanzar en el esquema.
+        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 4px;">
+          👉 Presiona <strong>GANA</strong> en cualquier jugador para avanzar de fase, o presiona ✏️ para editar cualquier nombre en vivo.
         </p>
       </div>
 
       <!-- Round Timer Floating Bar -->
-      <div class="timer-widget-card" style="margin-bottom: 16px; padding: 10px 16px;">
+      <div class="timer-widget-card">
         <div style="display:flex; align-items:center; gap: 10px;">
-          <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight:700;">⏱️ Reloj:</span>
-          <span id="timer-clock-display" class="timer-clock" style="font-size: 1.5rem;">15:00</span>
+          <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight:800;">⏱️ Reloj:</span>
+          <span id="timer-clock-display" class="timer-clock">15:00</span>
         </div>
         <div class="timer-controls">
           <button id="btn-timer-toggle" class="btn-action btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">
@@ -92,7 +98,7 @@
         </div>
       </div>
 
-      <!-- Champion Golden Banner (Reveals dynamically) -->
+      <!-- Champion Golden Banner (Dynamically revealed) -->
       <div id="champion-banner-container" style="display:none;"></div>
 
       <!-- Interactive Bracket Tree Schema -->
@@ -112,7 +118,7 @@
     </main>
   </div>
 
-  <!-- Modal: Crear Torneo Personalizado (Hidden By Default) -->
+  <!-- Modal: Crear Torneo Personalizado (Strictly Hidden by Default) -->
   <div id="modal-new-tournament" class="modal-overlay">
     <div class="modal-sheet">
       <div class="modal-header">
@@ -123,7 +129,7 @@
         <div class="modal-body">
           <div class="form-group">
             <label for="input-custom-name">Nombre del Torneo *</label>
-            <input type="text" id="input-custom-name" placeholder="Ej. Torneo Relámpago de Club" required>
+            <input type="text" id="input-custom-name" placeholder="Ej. Torneo de Ajedrez Relámpago" required>
           </div>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
@@ -154,10 +160,10 @@
     </div>
   </div>
 
-  <!-- Toast Notification Container -->
+  <!-- Toast Container -->
   <div id="toast-container" class="toast-container"></div>
 
-  <!-- JavaScript Modules -->
+  <!-- Main JavaScript App -->
   <script type="module" src="js/app.js"></script>
 </body>
 </html>

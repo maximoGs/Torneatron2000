@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Torneatron 2000 🏆♟️ | Gestor de Torneos de Ajedrez y Multideporte</title>
+  
+  <!-- SEO & Meta Description -->
+  <meta name="description" content="Crea y gestiona torneos de ajedrez (Sistema Suizo FIDE, Round Robin, Eliminación Directa) y multideporte en tu celular con desempates automáticos Buchholz y Sonneborn-Berger.">
+  <meta name="theme-color" content="#161b22">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Torneatron">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="apple-touch-icon" href="assets/icon-192.svg">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/mobile.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Main Top Sticky Header -->
+    <header class="app-header">
+      <div class="brand" id="brand-home-btn">
+        <div class="brand-icon">♟️</div>
+        <div class="brand-info">
+          <span class="brand-title">TORNEATRON</span>
+          <span class="brand-subtitle">Pro Chess 2000</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-new-tournament" class="icon-btn" title="Nuevo Torneo" aria-label="Nuevo Torneo">
+          ➕
+        </button>
+        <button id="btn-share-modal" class="icon-btn" title="Compartir Torneo" aria-label="Compartir Torneo">
+          🔗
+        </button>
+        <button id="theme-toggle-btn" class="icon-btn" title="Cambiar Tema" aria-label="Cambiar Tema">
+          🌓
+        </button>
+      </div>
+    </header>
+
+    <!-- Tournament Overview Banner -->
+    <section class="tournament-banner" style="margin: 16px 16px 0 16px;">
+      <div class="banner-header">
+        <h1 class="banner-title" id="tournament-title">Grand Prix Ajedrez Torneatron</h1>
+        <span class="banner-badge" id="tournament-type-badge">♟️ Suizo FIDE</span>
+      </div>
+      <div class="banner-meta">
+        <span class="meta-item" id="meta-rounds-info">Ronda <strong>1</strong> de <strong>5</strong></span>
+        <span class="meta-item" id="meta-players-info"><strong>8</strong> Jugadores</span>
+        <span class="meta-item" id="meta-timecontrol-info">Ritmo: <strong>15m + 10s</strong></span>
+      </div>
+    </section>
+
+    <!-- Main Content Views -->
+    <main>
+      <!-- ==========================================
+           VIEW 1: RONDAS Y PARTIDAS (MATCHES)
+           ========================================== -->
+      <section id="view-rounds" class="view-section active">
+        <!-- Round Navigator -->
+        <div class="round-nav-card">
+          <button id="btn-prev-round" class="round-selector-btn" aria-label="Ronda anterior">◀</button>
+          <div class="round-title-group">
+            <div class="round-main-title" id="current-round-display-title">⚔️ Ronda 1</div>
+            <div class="round-subtitle">Asignación de Mesas y Colores</div>
+          </div>
+          <button id="btn-next-round" class="round-selector-btn" aria-label="Siguiente ronda">▶</button>
+        </div>
+
+        <!-- Round Timer Widget -->
+        <div class="timer-widget-card">
+          <div>
+            <div style="font-size:0.75rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em;">Reloj de Ronda</div>
+            <div id="timer-clock-display" class="timer-clock">15:00</div>
+          </div>
+          <div class="timer-controls">
+            <button id="btn-timer-toggle" class="btn-action btn-primary" style="padding:8px 14px; font-size:0.82rem;">
+              ▶️ Iniciar
+            </button>
+            <button id="btn-timer-add5" class="btn-action btn-secondary" style="padding:8px 10px; font-size:0.82rem;">
+              +5m
+            </button>
+            <button id="btn-timer-reset" class="btn-action btn-secondary" style="padding:8px 10px; font-size:0.82rem;">
+              🔄
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Buttons Row -->
+        <div class="action-grid">
+          <button id="btn-generate-round" class="btn-action btn-primary">
+            ⚡ Generar Ronda
+          </button>
+          <button id="btn-share-whatsapp" class="btn-action btn-whatsapp">
+            💬 WhatsApp
+          </button>
+          <button id="btn-print-sheet" class="btn-action btn-secondary">
+            🖨️ Imprimir
+          </button>
+        </div>
+
+        <!-- Matches Cards Container -->
+        <div id="matches-container" class="matches-list">
+          <!-- Dynamically populated by app.js -->
+        </div>
+      </section>
+
+      <!-- ==========================================
+           VIEW 2: TABLA DE POSICIONES (STANDINGS)
+           ========================================== -->
+      <section id="view-standings" class="view-section">
+        <div class="table-card">
+          <div class="table-header-bar">
+            <h2 style="font-size: 1.1rem; font-weight: 800;">📊 Tabla de Posiciones Oficial</h2>
+            <button id="btn-copy-report" class="btn-action btn-secondary" style="padding:6px 12px; font-size:0.78rem;">
+              📋 Copiar
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="standings-table">
+              <thead>
+                <tr>
+                  <th style="text-align:center;">#</th>
+                  <th>Jugador / Club</th>
+                  <th style="text-align:center;">Pts</th>
+                  <th style="text-align:center;" title="Media Buchholz (Cut-1)">Buch-1</th>
+                  <th style="text-align:center;" title="Buchholz Total">Buch</th>
+                  <th style="text-align:center;" title="Sonneborn-Berger">SB</th>
+                  <th style="text-align:center;" title="Victorias">Vic</th>
+                  <th style="text-align:center;" title="Rating Promedio Rivales">ARO</th>
+                </tr>
+              </thead>
+              <tbody id="standings-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div style="font-size:0.78rem; color:var(--text-muted); padding: 0 4px;">
+          * Criterios FIDE aplicados: Puntos > Buchholz Cut-1 > Buchholz Total > Sonneborn-Berger > Cantidad de Victorias.
+        </div>
+      </section>
+
+      <!-- ==========================================
+           VIEW 3: JUGADORES (ROSTER)
+           ========================================== -->
+      <section id="view-players" class="view-section">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div>
+            <h2 style="font-size: 1.15rem; font-weight: 800;">👥 Lista de Jugadores</h2>
+            <div id="roster-total-count" style="font-size:0.8rem; color:var(--text-secondary);">8 Jugadores registrados</div>
+          </div>
+          <button id="btn-add-player" class="btn-action btn-primary" style="padding: 8px 14px; font-size:0.85rem;">
+            ➕ Añadir
+          </button>
+        </div>
+
+        <div id="players-roster-list">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- ==========================================
+           VIEW 4: BRACKETS (ELIMINACIÓN)
+           ========================================== -->
+      <section id="view-brackets" class="view-section">
+        <h2 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 14px;">🏆 Cuadro de Eliminación Directa</h2>
+        <div id="brackets-view-container">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- ==========================================
+           VIEW 5: AJUSTES Y EXPORTACIÓN
+           ========================================== -->
+      <section id="view-settings" class="view-section">
+        <div class="table-card" style="padding: 20px;">
+          <h2 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 14px;">⚙️ Configuración y Copia de Seguridad</h2>
+          
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label>Copia de Seguridad (JSON)</label>
+            <p class="form-hint" style="margin-bottom: 8px;">Guarda o restaura todo el estado de tus torneos en tu dispositivo móvil o computadora.</p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <button id="btn-export-json" class="btn-action btn-primary">
+                📁 Exportar Torneo (.json)
+              </button>
+              <label class="btn-action btn-secondary" style="cursor:pointer; margin-bottom:0;">
+                📥 Importar (.json)
+                <input type="file" id="import-file-input" accept=".json" style="display:none;">
+              </label>
+            </div>
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid var(--border-subtle); margin: 20px 0;">
+
+          <div class="form-group">
+            <label>Acerca de Torneatron 2000</label>
+            <p class="form-hint">
+              Desarrollado para directores de torneos, árbitros FIDE y organizadores deportivos. 100% portable, funciona sin conexión y respeta las normas oficiales de alternancia de colores y desempates.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ==========================================
+         BOTTOM MOBILE NAVIGATION BAR
+         ========================================== -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-tab="rounds">
+        <span class="nav-icon">⚔️</span>
+        <span>Rondas</span>
+      </button>
+      <button class="nav-item" data-tab="standings">
+        <span class="nav-icon">📊</span>
+        <span>Posiciones</span>
+      </button>
+      <button class="nav-item" data-tab="players">
+        <span class="nav-icon">👥</span>
+        <span>Jugadores</span>
+      </button>
+      <button class="nav-item" id="nav-brackets-btn" data-tab="brackets" style="display:none;">
+        <span class="nav-icon">🏆</span>
+        <span>Brackets</span>
+      </button>
+      <button class="nav-item" data-tab="settings">
+        <span class="nav-icon">⚙️</span>
+        <span>Ajustes</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ==========================================
+       MODAL: NUEVO TORNEO
+       ========================================== -->
+  <div id="modal-new-tournament" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h2 style="font-size: 1.2rem; font-weight: 800;">🏆 Crear Nuevo Torneo</h2>
+        <button class="icon-btn modal-close">✕</button>
+      </div>
+      <form id="form-new-tournament">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="input-tournament-name">Nombre del Torneo *</label>
+            <input type="text" id="input-tournament-name" placeholder="Ej. Abierto de Ajedrez de Verano 2026" required>
+          </div>
+
+          <div class="form-group">
+            <label for="select-tournament-type">Modalidad / Formato *</label>
+            <select id="select-tournament-type">
+              <option value="chess_swiss">♟️ Ajedrez: Sistema Suizo FIDE (Recomendado)</option>
+              <option value="chess_round_robin">♟️ Ajedrez: Round Robin / Todos contra Todos (Liga)</option>
+              <option value="chess_elimination">♟️ Ajedrez: Eliminación Directa (Playoffs)</option>
+              <option value="general_swiss">🏆 Multideporte: Sistema Suizo</option>
+              <option value="general_round_robin">🏆 Multideporte: Liga / Round Robin</option>
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label for="input-rounds-count">Número de Rondas</label>
+              <input type="number" id="input-rounds-count" min="1" max="25" value="5">
+            </div>
+            <div class="form-group">
+              <label for="input-time-control">Control de Tiempo</label>
+              <input type="text" id="input-time-control" value="15m + 10s" placeholder="Ej. 10m + 5s, 90m + 30s">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="textarea-initial-players">Jugadores Iniciales (Uno por línea)</label>
+            <span class="form-hint">Formato: Nombre, Elo (opcional), Club (opcional), Título (opcional)</span>
+            <textarea id="textarea-initial-players" rows="6" placeholder="Magnus Carlsen, 2835, Noruega, GM&#10;Hikaru Nakamura, 2802, EE.UU., GM&#10;Faustino Oro, 2450, Argentina, IM&#10;Alireza Firouzja, 2765, Francia, GM"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-action btn-secondary modal-close">Cancelar</button>
+          <button type="submit" class="btn-action btn-primary">⚡ Iniciar Torneo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL: AÑADIR JUGADOR
+       ========================================== -->
+  <div id="modal-add-player" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h2 style="font-size: 1.2rem; font-weight: 800;">👤 Añadir Jugador</h2>
+        <button class="icon-btn modal-close">✕</button>
+      </div>
+      <form id="form-add-player">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="input-player-name">Nombre Completo *</label>
+            <input type="text" id="input-player-name" placeholder="Ej. Garry Kasparov" required>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label for="input-player-elo">Rating Elo</label>
+              <input type="number" id="input-player-elo" placeholder="1500" value="1500">
+            </div>
+            <div class="form-group">
+              <label for="input-player-title">Título (Opcional)</label>
+              <input type="text" id="input-player-title" placeholder="GM, IM, FM, CM">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="input-player-club">Club / Ciudad / País</label>
+            <input type="text" id="input-player-club" placeholder="Ej. Club de Ajedrez Metropolitano">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-action btn-secondary modal-close">Cancelar</button>
+          <button type="submit" class="btn-action btn-primary">Guardar Jugador</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL: COMPARTIR / WHATSAPP
+       ========================================== -->
+  <div id="modal-share" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h2 style="font-size: 1.2rem; font-weight: 800;">🔗 Compartir Resultados</h2>
+        <button class="icon-btn modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.9rem; color:var(--text-secondary);">
+          Envía al instante las mesas de juego y la tabla de posiciones a tus jugadores por WhatsApp o imprímelo en papel.
+        </p>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <button id="btn-share-whatsapp-modal" class="btn-action btn-whatsapp" onclick="window.app.tournament && import('./js/share.js').then(m => m.Share.shareToWhatsApp(window.app.tournament))">
+            💬 Compartir en Grupo de WhatsApp
+          </button>
+          <button class="btn-action btn-secondary" onclick="window.app.tournament && import('./js/share.js').then(m => m.Share.copyToClipboard(window.app.tournament).then(ok => ok && window.app.showToast('¡Copiado!', 'success')))">
+            📋 Copiar Texto Formateado
+          </button>
+          <button class="btn-action btn-secondary" onclick="window.print()">
+            🖨️ Vista de Impresión / Guardar PDF
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-action btn-secondary modal-close">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- JavaScript Modules -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

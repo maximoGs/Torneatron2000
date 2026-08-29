@@ -1,5 +1,5 @@
 /**
- * Torneatron 2000 - Storage & Preset Manager
+ * Torneatron 2000 - Storage & Extended Master Preset Database (Up to 64 Players)
  */
 
 import { BracketEngine } from './bracketEngine.js';
@@ -59,14 +59,42 @@ export const Storage = {
       { id: 'p13', name: 'Levon Aronian', elo: 2725, club: 'EE.UU.', title: 'GM' },
       { id: 'p14', name: 'Maxime Vachier-Lagrave', elo: 2735, club: 'Francia', title: 'GM' },
       { id: 'p15', name: 'Daniil Dubov', elo: 2710, club: 'FIDE', title: 'GM' },
-      { id: 'p16', name: 'Hans Niemann', elo: 2715, club: 'EE.UU.', title: 'GM' }
+      { id: 'p16', name: 'Hans Niemann', elo: 2715, club: 'EE.UU.', title: 'GM' },
+      { id: 'p17', name: 'Ding Liren', elo: 2750, club: 'China', title: 'GM' },
+      { id: 'p18', name: 'Ian Nepomniachtchi', elo: 2767, club: 'FIDE', title: 'GM' },
+      { id: 'p19', name: 'Praggnanandhaa R', elo: 2755, club: 'India', title: 'GM' },
+      { id: 'p20', name: 'Vincent Keymer', elo: 2738, club: 'Alemania', title: 'GM' },
+      { id: 'p21', name: 'Shakhriyar Mamedyarov', elo: 2734, club: 'Azerbaiyán', title: 'GM' },
+      { id: 'p22', name: 'Alexander Grischuk', elo: 2728, club: 'FIDE', title: 'GM' },
+      { id: 'p23', name: 'Parham Maghsoodloo', elo: 2722, club: 'Irán', title: 'GM' },
+      { id: 'p24', name: 'Yu Yangyi', elo: 2718, club: 'China', title: 'GM' },
+      { id: 'p25', name: 'Vidit Gujrathi', elo: 2721, club: 'India', title: 'GM' },
+      { id: 'p26', name: 'Arjun Erigaisi', elo: 2795, club: 'India', title: 'GM' },
+      { id: 'p27', name: 'Wei Yi', elo: 2762, club: 'China', title: 'GM' },
+      { id: 'p28', name: 'Ray Robson', elo: 2705, club: 'EE.UU.', title: 'GM' },
+      { id: 'p29', name: 'Sam Shankland', elo: 2690, club: 'EE.UU.', title: 'GM' },
+      { id: 'p30', name: 'Alexei Shirov', elo: 2665, club: 'España', title: 'GM' },
+      { id: 'p31', name: 'David Antón', elo: 2670, club: 'España', title: 'GM' },
+      { id: 'p32', name: 'Jorden van Foreest', elo: 2685, club: 'Países Bajos', title: 'GM' }
     ];
 
-    const selectedPlayers = masterPlayers.slice(0, size);
+    // Generate up to 64 if needed
+    for (let i = 33; i <= 64; i++) {
+      masterPlayers.push({
+        id: `p${i}`,
+        name: `Maestro #${i}`,
+        elo: 2650 - (i - 33) * 8,
+        club: 'Club Internacional',
+        title: i <= 40 ? 'GM' : 'IM'
+      });
+    }
+
+    const count = Math.min(size, 64);
+    const selectedPlayers = masterPlayers.slice(0, count);
 
     return BracketEngine.createBracket({
-      id: `torneo_demo_${size}`,
-      name: `Copa Torneatron 2000 (${size} Maestros) ♟️`,
+      id: `torneo_demo_${count}`,
+      name: `Copa Torneatron 2000 (${count} Maestros) ♟️`,
       sport: 'chess',
       timeControl: '10m + 5s',
       seedMode: 'elo',

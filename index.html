@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Torneatron 2000 🏆♟️ | Esquema Interactivo de Torneos y Ajedrez</title>
+  <title>Torneatron 2000 🏆♟️ | Esquema Interactivo de Torneos</title>
   
-  <meta name="description" content="Crea esquemas interactivos de torneos de ajedrez y multideporte. Toca al ganador de cada enfrentamiento y avanza en tiempo real hacia el campeonato.">
+  <meta name="description" content="Crea esquemas interactivos de torneos de ajedrez y multideporte (2, 4, 8, 16, 32, 64 participantes). Toca al ganador de cada enfrentamiento y avanza en tiempo real.">
   <meta name="theme-color" content="#161b22">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="css/mobile.css">
 </head>
 <body>
-  <div id="app" style="padding-bottom: 30px;">
+  <div id="app">
     <!-- Top Header -->
     <header class="app-header">
       <div class="brand">
@@ -43,14 +43,17 @@
     </header>
 
     <!-- Main Container -->
-    <div style="padding: 14px 16px 0 16px;">
-      <!-- Quick Tournament Size Bar & Actions -->
+    <main style="padding: 16px; width: 100%;">
+      <!-- Quick Tournament Size Bar & Options -->
       <div class="quick-toolbar">
         <div class="size-pill-group">
-          <span class="size-label">Tamaño:</span>
+          <span class="size-label">👥 Tamaño:</span>
+          <button class="btn-quick-size" data-size="2">2</button>
           <button class="btn-quick-size" data-size="4">4</button>
           <button class="btn-quick-size active" data-size="8">8</button>
           <button class="btn-quick-size" data-size="16">16</button>
+          <button class="btn-quick-size" data-size="32">32</button>
+          <button class="btn-quick-size" data-size="64">64</button>
         </div>
         <div class="toolbar-actions">
           <button id="btn-shuffle-seeds" class="btn-action btn-secondary" style="padding: 6px 12px; font-size:0.8rem;" title="Mezclar emparejamientos">
@@ -69,7 +72,7 @@
           <span class="banner-badge" id="bracket-size-badge">⚡ 8 Participantes</span>
         </div>
         <p style="font-size: 0.8rem; color: var(--text-secondary);">
-          👉 Toca sobre cualquier jugador (⚪ Blancas o ⚫ Negras) para declararlo ganador y avanzar de fase.
+          👉 Toca sobre cualquier contrincante (⚪ Blancas o ⚫ Negras) para declararlo ganador y avanzar en el esquema.
         </p>
       </div>
 
@@ -106,15 +109,15 @@
           📁 Guardar JSON
         </button>
       </div>
-    </div>
+    </main>
   </div>
 
-  <!-- Modal: Crear Torneo Personalizado -->
+  <!-- Modal: Crear Torneo Personalizado (Hidden By Default) -->
   <div id="modal-new-tournament" class="modal-overlay">
     <div class="modal-sheet">
       <div class="modal-header">
         <h2 style="font-size: 1.2rem; font-weight: 800;">🏆 Crear Esquema Personalizado</h2>
-        <button class="icon-btn modal-close">✕</button>
+        <button class="icon-btn modal-close" type="button">✕</button>
       </div>
       <form id="form-new-tournament">
         <div class="modal-body">

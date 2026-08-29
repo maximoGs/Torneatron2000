@@ -1,68 +1,43 @@
 /**
- * Torneatron 2000 - Sharing & Report Generator
- * Formats tournament status, round pairings, and standings for WhatsApp, Telegram, and Print.
+ * Torneatron 2000 - Share & Report Formatter for Brackets
  */
 
-import { Tiebreaks } from './tiebreaks.js';
-
 export const Share = {
-  /**
-   * Generates formatted text for WhatsApp or clipboard
-   */
-  generateWhatsAppReport(tournament) {
-    const standings = Tiebreaks.calculateAll(tournament);
-    const currentRoundIdx = (tournament.currentRound || 1) - 1;
-    const currentRound = tournament.rounds && tournament.rounds[currentRoundIdx];
-
-    const playersMap = new Map(tournament.players.map(p => [p.id, p]));
-
-    let text = `🏆 *${tournament.name.toUpperCase()}*\n`;
-    text += `♟️ *Control de tiempo:* ${tournament.timeControl || 'Estándar'}\n`;
-    text += `📅 *Ronda:* ${tournament.currentRound || 1} de ${tournament.roundsCount}\n`;
+  generateBracketReport(bracket) {
+    let text = `🏆 *${bracket.name.toUpperCase()}*\n`;
+    text += `♟️ *Ritmo:* ${bracket.timeControl || 'Estándar'}\n`;
     text += `━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
-    if (currentRound) {
-      text += `⚔️ *EMPAREJAMIENTOS - RONDA ${currentRound.roundNumber}*\n`;
-      currentRound.pairings.forEach(match => {
-        const white = playersMap.get(match.whiteId)?.name || 'Desconocido';
-        const black = playersMap.get(match.blackId)?.name || 'Desconocido';
-        const res = match.result ? `[ ${match.result} ]` : 'vs';
-        text += `• *Mesa ${match.board}:* ⚪ ${white} ${res} ⚫ ${black}\n`;
+    bracket.rounds.forEach(round => {
+      text += `⚔️ *${round.name.toUpperCase()}*\n`;
+      round.matches.forEach(m => {
+        const p1 = m.player1?.name || 'Por definir';
+        const p2 = m.player2?.name || 'Por definir';
+        const res = m.winnerId ? (m.winnerId === m.player1?.id ? `[ ${p1} GANADOR ✓ ]` : `[ ${p2} GANADOR ✓ ]`) : 'vs';
+
+        text += `• Mesa ${m.board}: ⚪ ${p1} ${res} ⚫ ${p2}\n`;
       });
-
-      if (currentRound.byePlayerId) {
-        const byePlayer = playersMap.get(currentRound.byePlayerId)?.name || 'Desconocido';
-        text += `• *Descanso (Bye 1.0 pt):* ${byePlayer}\n`;
-      }
-      text += `\n━━━━━━━━━━━━━━━━━━━━━\n\n`;
-    }
-
-    text += `📊 *TABLA DE POSICIONES (TOP 10)*\n`;
-    standings.slice(0, 10).forEach((p, idx) => {
-      const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}.`;
-      text += `${medal} *${p.name}* | *${p.score} pts* (Buch: ${p.buchholzCut1} | SB: ${p.sonnebornBerger})\n`;
+      text += `\n`;
     });
 
-    text += `\nGenerado con *Torneatron 2000* ⚡`;
+    if (bracket.champion) {
+      text += `━━━━━━━━━━━━━━━━━━━━━\n`;
+      text += `👑 *¡CAMPEÓN DEL TORNEO!* 👑\n`;
+      text += `🥇 *${bracket.champion.name}* (${bracket.champion.elo || 1200} Elo)\n\n`;
+    }
 
+    text += `Generado en vivo con *Torneatron 2000* ⚡`;
     return text;
   },
 
-  /**
-   * Opens WhatsApp with prefilled message
-   */
-  shareToWhatsApp(tournament) {
-    const text = this.generateWhatsAppReport(tournament);
+  shareToWhatsApp(bracket) {
+    const text = this.generateBracketReport(bracket);
     const encoded = encodeURIComponent(text);
-    const url = `https://api.whatsapp.com/send?text=${encoded}`;
-    window.open(url, '_blank');
+    window.open(`https://api.whatsapp.com/send?text=${encoded}`, '_blank');
   },
 
-  /**
-   * Copies report to clipboard
-   */
-  async copyToClipboard(tournament) {
-    const text = this.generateWhatsAppReport(tournament);
+  async copyToClipboard(bracket) {
+    const text = this.generateBracketReport(bracket);
     if (navigator.clipboard && navigator.clipboard.writeText) {
       await navigator.clipboard.writeText(text);
       return true;
